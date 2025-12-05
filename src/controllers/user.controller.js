@@ -39,7 +39,7 @@ const registerUser = asyncHandler( async(req, res)=>{
     }
 
     //check if already exist, check by usename, email
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
 
@@ -49,7 +49,8 @@ const registerUser = asyncHandler( async(req, res)=>{
 
     //check for images, check for avtar compalsory
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+    console.log(avatarLocalPath);
 
     if(!avatarLocalPath){
         throw new ApiError(400, "Avatar file is required");
@@ -59,6 +60,7 @@ const registerUser = asyncHandler( async(req, res)=>{
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    console.log(avatar);
 
     if(!avatar){
         throw new ApiError(400, "Avatar file is required");

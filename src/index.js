@@ -4,6 +4,7 @@ import connectDB from "./db/index.js";
 import { app } from "./app.js";
 
 dotenv.config();
+// console.log('ENV TEST:', process.env.CLOUDINARY_CLOUD_NAME);
 
 connectDB()
 .then(()=>{
