@@ -49,8 +49,14 @@ const registerUser = asyncHandler( async(req, res)=>{
 
     //check for images, check for avtar compalsory
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+    // const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+    let coverImageLocalPath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+        coverImageLocalPath = req.files.coverImage[0].path;
+    }
+
     console.log(avatarLocalPath);
+    console.log(coverImageLocalPath);
 
     if(!avatarLocalPath){
         throw new ApiError(400, "Avatar file is required");
@@ -60,8 +66,10 @@ const registerUser = asyncHandler( async(req, res)=>{
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-    console.log(avatar);
 
+    console.log(avatar);
+    console.log(coverImage);
+    
     if(!avatar){
         throw new ApiError(400, "Avatar file is required");
     }
@@ -75,6 +83,7 @@ const registerUser = asyncHandler( async(req, res)=>{
         password,
         username: username.toLowerCase()
     })
+    
     //remove password and refresh token field from response
 
     //check for user creation -> mongodb automatically create _id
