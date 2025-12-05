@@ -1,6 +1,9 @@
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {User} from "../models/user.model.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+
 
 const registerUser = asyncHandler( async(req, res)=>{
     //get user data from frontend
@@ -53,10 +56,38 @@ const registerUser = asyncHandler( async(req, res)=>{
     }
 
     //upload them to cloudinary it return response in url, check avtar is uploaded
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+    if(!avatar){
+        throw new ApiError(400, "Avatar file is required");
+    }
+
     //create object, in mongodb nosql ->create entry in db
+    const user = await User.create({
+        fullName,
+        avatar: avatar.url,
+        coverImage: coverImage?.url || "", //coverImage pe vailidation nhi hai so we check hai to url do nhi to empty rakh do
+        email,
+        password,
+        username: username.toLowerCase()
+    })
     //remove password and refresh token field from response
-    //check for user creation
+
+    //check for user creation -> mongodb automatically create _id
+    const createdUser = await User.findById(user._id).select(
+        "-password -refreshToken" //jo include nhi karna minus sign ke sath string mein add karna hai
+    )
+
+    if(!createdUser){
+        throw new ApiError(500, "Something went wrong while registring the user")
+    }
+
     // return response
+    return res.status(201).json(
+        new ApiResponse(200, createdUser, "User Registered Successfully")
+    )
 })
 
 export {registerUser}
