@@ -6,13 +6,20 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 const generateAccessAndRefreshToken = async(userId)=>{
     try {
-        const user = await User.findOne(userId);
+        console.log("generating")
+        const user = await User.findById(userId);
+        console.log(user);
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
 
         user.refreshToken = refreshToken;
+        console.log("token genrated");
         //save karenge to sab cheej kickin na ho to use validateBeforeSave
-        await user.save({validateBeforeSave: true});
+        try {
+            await user.save({validateBeforeSave: true});
+        } catch (error) {
+            console.log("error while saving user", error);
+        }
 
         return {accessToken, refreshToken};
 
@@ -130,7 +137,7 @@ const loginUser = asyncHandler(async(req, res) => {
 
     const {username, email, password} = req.body;
     //check for fields
-    if(!username || !email){
+    if( !(username || email) ){
         throw new ApiError(400, "username or email is required");
     }
 
