@@ -474,7 +474,7 @@ const getWatchHistory = asyncHandler(async(req, res)=>{
                 //yeh id string mein deta hai jo
                 // mongoose id mein badal deta hai
                 // but yaha but yaha mongoose kaam nhi karat hai so hum mongoose ki object id create karte hai
-                _id: new mongoose.Types.ObjectId(req.user._id);
+                _id: new mongoose.Types.ObjectId(req.user._id)
             }
         },
         {
