@@ -75,7 +75,7 @@ const registerUser = asyncHandler( async(req, res)=>{
     }
 
     //check for images, check for avtar compalsory
-    const avatarLocalPath = req.files?.avatar[0]?.path;
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
     // const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
     let coverImageLocalPath;
     if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
@@ -192,8 +192,8 @@ const logoutUser = asyncHandler(async(req, res) => {
     await User.findByIdAndDelete(
         req.user._id,
         {
-            $set : {
-                 refreshToken : undefined
+            $unset : {
+                 refreshToken : 1 //this removes the field from document
             }
         },
         {
@@ -414,7 +414,7 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
             $lookup:{
                 from: "subscriptions",
                 localField: "_id",
-                foreignField: "subcriber", //subscriber ko select karenge to channel milenge jo subscribe kiye hue hai
+                foreignField: "subscriber", //subscriber ko select karenge to channel milenge jo subscribe kiye hue hai
                 as: "subscribedTo"
             }
         },
@@ -424,7 +424,7 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
                     $size: "$subscribers"
                 },
                 channelsSubscribedToCount: {
-                    $size: "$subcribedTo"
+                    $size: "$subscribedTo"
                 },
                 isSubscribed: {
                     $cond:{
