@@ -4,6 +4,7 @@ import {User} from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 
 const generateAccessAndRefreshToken = async(userId)=>{
@@ -460,10 +461,61 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
         new ApiResponse(
             200,
             channel[0],
-            "User channel does fetched successfully"
+            "User channel fetched successfully"
         )
     )
 })
+
+const getWatchHistory = asyncHandler(async(req, res)=>{
+    const user = await User.aggregate([
+        {
+            $match: {
+                // _id : req.user._id
+                //yeh id string mein deta hai jo
+                // mongoose id mein badal deta hai
+                // but yaha but yaha mongoose kaam nhi karat hai so hum mongoose ki object id create karte hai
+                _id: new mongoose.Types.ObjectId(req.user._id);
+            }
+        },
+        {
+            $lookup:{
+                from: "videos", //yaha lowercase mein s ke sath likhna hai,
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                //yaha sub pipeline use hogi
+                pipeline: [
+                    {
+                        $lookup: {
+                            from : "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullName: 1,
+                                        username: 1,
+                                        avatar: 1,
+
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    { //frontend will get data in good ofrm
+                        $addFields: {
+                            owner:{
+                                $first: "$owner"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ])
+})
+
 export {
     registerUser,
     loginUser,
@@ -473,5 +525,7 @@ export {
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getUserChannelProfile,
+    getWatchHistory
 }
