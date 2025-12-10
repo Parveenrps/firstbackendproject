@@ -81,13 +81,54 @@ const toggleCommentLike = asyncHandler(async( req, res )=>{
         .json( new ApiResponse(
             200,
             likeRemoved,
-            "Like removed!"
+            "Like removed from comment"
         ))
     }
     
 })
 
+const toggleTweetLike = asyncHandler( async(req, res)=>{
+    const {tweetId} = req.params
+
+    if(!tweetId){
+        throw new ApiError(400, "Tweet does not exist");
+    }
+
+    const isTweetLiked = await Like.findOne({
+        tweet : tweetId,
+        likedBy: req.user._id
+    })
+
+    if(!isTweetLiked){
+        const like = await Like.create({
+            tweet : tweetId,
+            likedBy : req.user._id
+        })
+
+        return res
+        .status(200)
+        .json( new ApiResponse(
+            200,
+            like,
+            "Tweet Liked"
+        ))
+    }
+
+    else{
+        const likeRemoved = isTweetLiked.deleteOne();
+
+        return res
+        .status(200)
+        .json( new ApiResponse(
+            200,
+            likeRemoved,
+            "Like is removed from tweet"
+        ))
+    }
+})
+
 export {
     toggleVideoLike,
-    toggleCommentLike
+    toggleCommentLike,
+    toggleTweetLike
 }

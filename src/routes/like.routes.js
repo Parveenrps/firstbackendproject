@@ -9,5 +9,6 @@ router.use(verifyJwt);
 
 router.route("/toggle/v/:videoId").post(toggleVideoLike);
 router.route("/toggle/c/:commentId").post(toggleCommentLike);
+router.route("/toggle/t/:tweetId").post(togg)
 
 export default router;
