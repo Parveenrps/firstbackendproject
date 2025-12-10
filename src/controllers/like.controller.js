@@ -3,7 +3,6 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-
 const toggleVideoLike = asyncHandler(async(req, res)=>{
     const {videoId} = req.params;
 
@@ -127,6 +126,23 @@ const toggleTweetLike = asyncHandler( async(req, res)=>{
     }
 })
 
+const getAllLikedVideo = asyncHandler(async(req, res)=>{
+    const likedVideos = await Like.aggregate([
+        {
+            $match:{
+                likedBy : req.user._id
+            }
+        },
+        {
+            $lookup:{
+                from: "videos",
+                localField: "video",
+                foreignField: "_id",
+                as: "videoDetails"
+            }
+        }
+    ])
+})
 export {
     toggleVideoLike,
     toggleCommentLike,
