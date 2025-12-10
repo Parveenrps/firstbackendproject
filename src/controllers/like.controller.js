@@ -45,6 +45,49 @@ const toggleVideoLike = asyncHandler(async(req, res)=>{
     }
 })
 
+const toggleCommentLike = asyncHandler(async( req, res )=>{
+    const {commentId} = req.params;
+    //comment exist or not
+    if(!commentId){
+        throw new ApiError(400, "Comment does not exist");
+    }
+
+    const isCommentLiked = await Like.findOne({
+        comment : commentId,
+        likedBy: req.user._id
+    })
+
+    //if not liked
+    if(!isCommentLiked){
+        const like = await Like.create({
+            comment : commentId,
+            likedBy : req.user._id
+        })
+
+        res
+        .status(200)
+        .json( new ApiResponse(
+            200,
+            like,
+            "Comment Liked"
+        ))
+    }
+
+    else{
+        const likeRemoved = isCommentLiked.deleteOne();
+
+        res
+        .status(200)
+        .json( new ApiResponse(
+            200,
+            likeRemoved,
+            "Like removed!"
+        ))
+    }
+    
+})
+
 export {
-    toggleVideoLike
+    toggleVideoLike,
+    toggleCommentLike
 }
