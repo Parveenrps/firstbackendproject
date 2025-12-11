@@ -140,11 +140,32 @@ const getAllLikedVideo = asyncHandler(async(req, res)=>{
                 foreignField: "_id",
                 as: "videoDetails"
             }
+        },
+        {
+            $lookup: {
+                from: "user",
+                localField: "likedBy",
+                foreignField: "_id",
+                as: "channel"
+            }
         }
     ])
+
+    if(!likedVideos){
+        throw new ApiError(400, "Liked Video fetching failed")
+    }
+
+    return res
+    .status(200)
+    .json(
+        200,
+        likedVideos,
+        "all liked videos"
+    )
 })
 export {
     toggleVideoLike,
     toggleCommentLike,
-    toggleTweetLike
+    toggleTweetLike,
+    getAllLikedVideo
 }
