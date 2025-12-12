@@ -101,14 +101,12 @@ const getUserAllTweets = asyncHandler(async(req, res)=>{
         },
         {
             $lookup:{
-                from : "likes",
-                let : { tweetId : "$tweets._id"},
+                from: "likes",
+                let: { tweetId: "$tweets._id" },
                 pipeline: [
                     {
-                        $match: {
-                            $expr: {
-                                $eq : ["$tweet", "$$tweetId"]
-                            }
+                        $match :{
+                                $expr: { $eq : [ "$tweet", "$$tweetId" ] } //expr->expration, eq->equal 
                         }
                     },
                     {
@@ -119,23 +117,17 @@ const getUserAllTweets = asyncHandler(async(req, res)=>{
             }
         },
         {
-            $addFields: {
+            $addFields : {
                 "tweets.likeCount" : {
-                    $ifNull : [ {
-                        $arrayElemAt : [ "$likeCount.count", 0 ] 
-                    }, 0]
+                    $ifNull : [
+                        {
+                            $arrayElemAt : ["likesCount.count", 0]
+                        },
+                        0
+                    ]
                 }
             }
-        },
-        {
-            $project:{
-                fullName: 1,
-                username: 1,
-                avatar: 1,
-                tweets: 1
-            }
         }
-
     ])
 })
 export {
