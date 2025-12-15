@@ -1,3 +1,4 @@
+import { isValidObjectId } from "mongoose";
 import { Playlist } from "../models/playlist.model";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
@@ -52,7 +53,106 @@ const deletePlaylist = asyncHandler( async(req, res)=>{
     ))
 })
 
+const updatePlaylist = asyncHandler(async(req, res)=>{
+    const {playlistId} = req.params
+    const {name, description} = req.body
+
+    if (!isValidObjectId(playlistId)) {
+        throw new ApiError(400, "Invalid objectId");
+    }
+
+    if(!name || !description){
+        throw new ApiError(400, "Name and Description is required");
+    }
+
+    const updatedPlaylist = await Playlist.findByIdAndUpdate(
+        playlistId,
+        {
+            $set: {
+                name : name,
+                description: description
+            }
+        },
+        { new : true }
+    )
+
+    if(!updatePlaylist){
+        throw new ApiError(400, "Playlist update failed")
+    }
+
+    return res
+    .status(200)
+    .json( new ApiResponse(
+        200,
+        updatePlaylist,
+        "Playlist updated successfully"
+    ))
+})
+
+const addVideoToPlaylist = asyncHandler(async(req, res)=>{
+    const { playlistId, videoId } = req.params
+
+    if( !isValidObjectId(playlistId) || !isValidObjectId(videoId) ){
+        throw new ApiError( 400, "Invalid playlist or video id");
+    }
+    const updatedPlaylist = await Playlist.findByIdAndUpdate(
+        playlistId,
+        {
+            $addToSet :{ //add only if not present
+                videos : videoId
+            }
+        },
+        { new : true}
+    )
+
+    if(!updatedPlaylist){
+        throw new ApiError(400, "Video add in playlist failed")
+    }
+
+    return res
+    .status(200)
+    .json( new ApiResponse(
+        200,
+        updatedPlaylist,
+        "video added in the playlist"
+    ))
+})
+
+const removeVideoFromPlaylist = asyncHandler(async(req, res)=>{
+    const {playlistId, videoId} = req.params
+
+    if(!isValidObjectId(playlistId) || isValidObjectId(videoId)){
+        throw new ApiError(400, "Invalid playlist id or video id")
+    }
+
+    const updatedPlaylist = await Playlist.findByIdAndUpdate(
+        playlistId,
+        {
+            $pull:{
+                videos : videoId
+            }
+        },
+        { new : true }
+    )
+
+    if(!updatedPlaylist){
+        throw new ApiError(400, "Error while removing video from playlist")
+    }
+
+    return res
+    .status(200)
+    .json( new ApiResponse(
+        200,
+        updatedPlaylist,
+        "Video removed from playlist"
+    ))
+
+})
+
 export {
     createPlaylist,
-    deletePlaylist
+    deletePlaylist,
+    updatePlaylist,
+    addVideoToPlaylist,
+    removeVideoFromPlaylist
 }
