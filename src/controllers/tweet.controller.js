@@ -127,9 +127,36 @@ const getUserAllTweets = asyncHandler(async(req, res)=>{
                     ]
                 }
             }
+        },
+        {
+            $group : {
+                _id : "$_id",
+                fullName : {$first: "$fullName"},
+                username: {$first : "$username"},
+                avatar: {$first : "$avatar"},
+                tweets : {$push: "$tweets"}
+            }
+        },
+        {
+            $project : {
+                _id: 1,
+                fullName: 1,
+                username: 1,
+                avatar: 1,
+                tweets: 1
+            }
         }
     ])
+
+    return res
+    .status(200)
+    .json( new ApiResponse(
+        200,
+        allUserTweets,
+        "all tweets of user fecthed successfully"
+    ))
 })
+
 export {
     createTweet,
     updateTweet,
