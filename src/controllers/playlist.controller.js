@@ -76,7 +76,7 @@ const updatePlaylist = asyncHandler(async(req, res)=>{
         { new : true }
     )
 
-    if(!updatePlaylist){
+    if(!updatedPlaylist){
         throw new ApiError(400, "Playlist update failed")
     }
 
@@ -84,7 +84,7 @@ const updatePlaylist = asyncHandler(async(req, res)=>{
     .status(200)
     .json( new ApiResponse(
         200,
-        updatePlaylist,
+        updatedPlaylist,
         "Playlist updated successfully"
     ))
 })
